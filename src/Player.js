@@ -1,16 +1,7 @@
 class Player {
-  constructor(playerName, playerWager) {
+  constructor(playerName) {
     this.playerScore = 0;
     this.playerName = playerName;
-    this.canWager = false;
-    this.playerWager = playerWager;
-  }
-
-  manageWagers() {
-  }
-
-  returnWagerPoints() {
-    //playerWager * 2
   }
 }
 

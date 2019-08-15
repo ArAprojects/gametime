@@ -1,54 +1,282 @@
 /* This is an example of using Sass, otherwise plain CSS works too*/
+@import 'variables';
 
 * {
-  margin: 0;
   box-sizing: border-box;
+  font-family: $main-font;
+  margin: 0;
 }
 
 body {
   background-image: url("../images/regular-page.png");
-  background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
-  height: 850px;
+  background-size: 100% 100%;
+  height: 100vh;
+}
+
+.splash-h1,
+.splash-h2,
+.start-game-form {
+  padding-top: 50px;
+  text-align: $center;
+}
+
+.splash-h1 {
+  color: $pop-color-1;
+  font-size: 170px;
+}
+
+.splash-h2 {
+  letter-spacing: 2px;
+}
+
+.splash-h2, 
+label {
+  color: $pop-color-2;
+  font-size: $splash-font-size;
+}
+
+.name-input {
+  border: $border-size $border-type $pop-color-3;
+  border-radius: $border-radius;
+  font-size: 20px;
+  height: $input-height;
+  margin-right: 30px;
+  text-align: $center;
+  width: 300px;
 }
 
 table {
-  border: 2px solid black;
-  height: 500px;
-  width: 50%;
-  margin-left: 25%;
-}
-
-th {
-  border: 2px solid black;
-  width: 25%;
-}
-
-.player-name {
-  margin-top: 40px;
-}
-
-.player-forms {
+  border: 8px solid $pop-color-1;
   display: inline-block;
+  margin-bottom: 14%;
+  margin-left: 3%;
+  table-layout: fixed;
+  width: 69%;
+    th {
+      border: 4px dotted $pop-color-2;
+      height: 100px;
+      width: 25vw;
+  }
 }
+
+.player-bar {
+  float: right;
+  margin-right: 3%;
+  margin-top: 5%;
+    .player-name,
+    .player-score {
+      font-size: 50px;
+      margin-top: 20px;
+      text-align: $center;
+  }
+}
+
+
 
 .question-and-answer {
-  height: 400px;
-  width: 500px;
-  border: 2px solid black;
+  align-items: center;
+  border: 10px $border-type $pop-color-3;
   display: flex;
   flex-direction: column;
+  height: 500px;
   justify-content: center;
-  align-items: center;
   margin: auto;
+  margin-top: 30px;
+  width: 1100px;
+    .question {
+      font-size: 2em;
+      text-align: $center;
+  }
+}
+
+.name-label {
+  display: inline-block;
+    label {
+      display: block;
+    }
+}
+
+.start-game-button {
+  background-color: $pop-color-1;
+  border: $border-size $border-type $pop-color-2;
+  border-radius: $border-radius;
+  color: $pop-color-2;
+  display: block;
+  font-size: $splash-font-size;
+  height: 70px;
+  margin-left: 39vw;
+  margin-top: 50px;
+  width: 390px;
+}
+
+input:focus::-webkit-input-placeholder {
+  opacity: 0;
+}
+
+.categories {
+  color: $pop-color-1;
+  font-size: 30px;
+}
+
+.card {
+  color: $neutral-color;
+  font-size: 80px;
+}
+
+
+.main-h1 {
+  color: #cb4154;
+  display: inline;
+  font-size: 100px;
+  margin-left: 3%;
+  padding-top: 50px;
+  text-orientation: upright;
+  writing-mode: vertical-rl;
+}
+
+.restart-game-button {
+  float: right;
+}
+
+#player-1-name {
+  color: $pop-color-3;
+}
+
+#player-2-name {
+  color: $pop-color-2;
+}
+
+#player-3-name {
+  color: $pop-color-1;
+}
+
+.player-score {
+  color: $neutral-color;
+}
+
+#player-answer-input {
+  border: $border-size $border-type $pop-color-3;
+  border-radius: $border-radius;
+  display: block;
+  font-size: 20px;
+  height: $input-height;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 450px;
 }
 
 .question {
-  text-align: center;
-  font-size: 2em;
+  color: $neutral-color;
+  font-size: 60px;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
 }
 
-.player-input-labels {
-  font-size: 1.5em
+#player-answer-button {
+  background-color: $pop-color-1;
+  border: $border-size $border-type $pop-color-2;
+  border-radius: $border-radius;
+  color: $pop-color-2;
+  font-size: 40px;
+  height: $input-height;
+  width: 450px;
+}
+
+.final-round-page {
+  border: 10px $border-type $pop-color-3;
+  text-align: center;
+  width: 1100px;
+  height: 490px;
+  display: inline-block;
+  position: absolute;
+  margin-top: 3%;
+  margin-left: 15%
+}
+
+#final-category {
+  color: $pop-color-1;
+  font-size: 63px;
+  margin-top: 30px;
+}
+
+#final-clue {
+  color: $neutral-color;
+  font-size: 45px;
+  margin-top: 30px;
+}
+
+.final-round-player-box {
+  display: inline-block;
+  margin-top: 50px;
+}
+
+#player-2-final-info {
+  margin-right: 50px;
+  margin-left: 50px;
+}
+
+.final-round-label {
+  font-size: 30px;
+  color: $neutral-color;
+  display: block;
+}
+
+.final-wage-input,
+.final-answer-input {
+  border: $border-size $border-type $pop-color-3;
+  border-radius: $border-radius;
+  font-size: 18px;
+  height: 40px;
+  text-align: $center;
+  width: 260px;
+}
+
+#final-round-player-1 {
+  color: $pop-color-3;
+  font-size: 46px;
+}
+
+#final-round-player-2 {
+  color: $pop-color-2;
+  font-size: 46px;
+}
+
+#final-round-player-3 {
+  color: $pop-color-1;
+  font-size: 46px;
+}
+
+#player-1-final-wager-button,
+#player-1-final-answer-button {
+  border: 2px $border-type $pop-color-1;
+  background-color: $pop-color-3;
+  border-radius: 50%;
+  color: $neutral-color;
+  font-size: 20px;
+  height: 40px;
+  width: 40px;
+}
+
+#player-2-final-wager-button,
+#player-2-final-answer-button {
+  border: 2px $border-type $pop-color-3;
+  background-color: $pop-color-2;
+  border-radius: 50%;
+  color: $neutral-color;
+  font-size: 20px;
+  height: 40px;
+  width: 40px;
+}
+
+#player-3-final-wager-button,
+#player-3-final-answer-button {
+  border: 2px $border-type $pop-color-2;
+  background-color: $pop-color-1;
+  border-radius: 50%;
+  color: $neutral-color;
+  font-size: 20px;
+  height: 40px;
+  width: 40px;
+
 }

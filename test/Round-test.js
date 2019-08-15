@@ -6,14 +6,12 @@ import Game from '../src/Game.js';
 const expect = chai.expect;
 
 describe('Round', () => {
-  // let player;
   let game;
   let round;
 
   beforeEach(() => {
     game = new Game(data)
     game.startRound()
-    // player = new Player('bill')
     round = game.currentRound
   });
 
@@ -53,11 +51,8 @@ describe('Round', () => {
     game.startRound()
     round = game.currentRound
     round.generateRandomDailyDoubleCard2()
-    expect(round.dailyDouble2).to.not.equal(undefined);
+    // expect(round.dailyDouble2).to.not.equal(undefined);
     expect(round.dailyDouble2).to.not.equal(round.dailyDouble1);
   }); 
 
-  // it.skip('should end game once array length is 0', () => {
-  //   expect(round.endGame()).to.equal();
-  // });
 });

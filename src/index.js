@@ -2,8 +2,10 @@ import "./css/base.scss";
 import $ from "jquery";
 import Game from "../src/Game.js";
 import Player from "../src/Player.js";
-import brick from "../src/brick.png"
+// import FinalRound from "../src/FinalRound.js"
+import brick from "../src/brick.png";
 
+var tableClone = $("table").clone();
 
 let data;
 fetch("https://fe-apps.herokuapp.com/api/v1/gametime/1903/jeopardy/data")
@@ -11,11 +13,15 @@ fetch("https://fe-apps.herokuapp.com/api/v1/gametime/1903/jeopardy/data")
   .then(fetchData => (data = fetchData.data));
 
 $(document).ready(function() {
-  $(':input[type="submit"]').prop('disabled', true);
+  $(".start-game-button").prop("disabled", true);
+  $(".final-round-page").hide();
   $('input[type="text"]').keyup(function() {
-    if ($('#player-one-name-input').val() !== '' && $('#player-two-name-input').val() !== ''
-        && $('#player-three-name-input').val() !== '') {
-      $(':input[type="submit"]').prop('disabled', false);
+    if (
+      $("#player-one-name-input").val() !== "" &&
+      $("#player-two-name-input").val() !== "" &&
+      $("#player-three-name-input").val() !== ""
+    ) {
+      $(".start-game-button").prop("disabled", false);
     }
   });
 });
@@ -26,62 +32,83 @@ $(".start-game-button").on("click", function(e) {
   var player2 = new Player($("#player-two-name-input").val());
   var player3 = new Player($("#player-three-name-input").val());
   var game = new Game(data, [player1, player2, player3]);
-  $(".splash-page").hide();
-  $(".main-page").show();
   game.startRound();
-  makeBoard(game.currentRound);
-  getCards(game.currentRound, game);
-  guessManager(game, player1, player2, player3);
+  startRoundManager(game.currentRound, game);
+  guessManager(game, player1, player2, player3, game.currentRound);
   updatePlayerName(player1, player2, player3);
+  assignDailyDouble(game.currentRound, game);
 });
 
-
 function evaluateGuess(game) {
-  if (game.currentPlayer === 2 && game.currentCard.answer.toLowerCase() !== game.playerSet[game.currentPlayer].guess) {
-    game.playerSet[game.currentPlayer].playerScore -= game.currentCard.pointValue;
-    game.currentPlayer = 0
-  } else if (game.currentCard.answer.toLowerCase() === game.playerSet[game.currentPlayer].guess) {
-    game.playerSet[game.currentPlayer].playerScore += game.currentCard.pointValue;
+  if (
+    game.currentPlayer === 2 &&
+    game.currentCard.answer.toLowerCase() !==
+      game.playerSet[game.currentPlayer].guess.toLowerCase()
+  ) {
+    game.playerSet[game.currentPlayer].playerScore -=
+      game.currentCard.pointValue * game.currentRoundNum;
+    game.currentPlayer = 0;
+  } else if (
+    game.currentCard.answer.toLowerCase() ===
+    game.playerSet[game.currentPlayer].guess.toLowerCase()
+  ) {
+    game.playerSet[game.currentPlayer].playerScore +=
+      game.currentCard.pointValue * game.currentRoundNum;
   } else {
-    (game.currentCard.answer.toLowerCase() !== game.playerSet[game.currentPlayer].guess) 
-    game.playerSet[game.currentPlayer].playerScore -= game.currentCard.pointValue;
+    game.currentCard.answer.toLowerCase() !==
+      game.playerSet[game.currentPlayer].guess.toLowerCase();
+    game.playerSet[game.currentPlayer].playerScore -=
+      game.currentCard.pointValue * game.currentRoundNum;
     game.currentPlayer++;
   }
 }
 
-
 function assignGuess(game) {
-  game.playerSet[game.currentPlayer].guess = $(
-    `#player-1-answer-input`).val();
+  game.playerSet[game.currentPlayer].guess = $("#player-answer-input").val();
 }
 
-function guessManager(game, player1, player2, player3) {
-  $(`#player-1-answer-button`).on("click", function(e) {
+function guessManager(game, player1, player2, player3, round) {
+  $("#player-answer-button").on("click", function(e) {
     e.preventDefault();
+    round.remainingCardCount--;
     assignGuess(game);
-    evaluateGuess(game);
+    evaluateGuess(game, round);
     updatePlayerScore(player1, player2, player3);
-    $(`#${game.block}`).html(`<img style="height:200px;" id="brick" src=${brick} />`)
-    $(`#${game.block}`).off()
-    $(".question-and-answer").hide()
-    $("table").show()
+    guessDomWork(game);
+    endRound(round, game);
   });
+}
+
+function startRoundManager(round, game) {
+  makeBoard(round);
+  getCards(round, game);
+}
+
+function guessDomWork(game) {
+  $(`#${game.block}`).html(
+    `<img style="height:60px; width:100px;" id="brick" src=${brick} />`
+  );
+  $(`#${game.block}`).off();
 }
 
 function getCards(round, game) {
   $(".card").on("click", function(e) {
-    var question = $(e.target).closest("th").text();
-    game.block = event.target.id
+    var question = $(e.target)
+      .closest("th")
+      .text();
+    game.block = event.target.id;
     round.cardSet.forEach(array1 =>
       array1.find(el => {
         if (el.question === question) {
           game.currentCard = el;
-          $(".question").text(game.currentCard.question)
-          $(".player-input-labels").text(game.playerSet[game.currentPlayer].playerName + " Its Your Turn!")
-          console.log(game.currentCard)
-          $('.card').on('click', () => {
-            game.currentCard.answer.toLowerCase()
-          })
+          $(".question").text(game.currentCard.question);
+          $(".player-input-labels").text(
+            game.playerSet[game.currentPlayer].playerName + ", it's your turn!"
+          );
+          $(".question").text(game.currentCard.question);
+          $(".player-input-labels").text(
+            game.playerSet[game.currentPlayer].playerName + ", it's your turn!"
+          );
         }
       })
     );
@@ -90,14 +117,19 @@ function getCards(round, game) {
 
 function makeBoard(currentRound) {
   currentRound.categories.forEach((cat, index) => {
-    $(`#category-name-${index + 1}`).html(cat[0]);
+    $(`#category-name-${index + 1}`).html(
+      cat[0].replace(/([A-Z])/g, " $1").replace(/^./, function(str) {
+        return str.toUpperCase();
+      })
+    );
   });
   currentRound.cardSet.forEach(el =>
     el.forEach((card, index) => {
       $(".card").on("click", function(e) {
-        $(".question-and-answer").show()
-        $(e.target).closest($(`#category-${index + 1}-${card.pointValue.toString()}`)).text(card.question);
-        $("table").hide()
+        $(e.target)
+          .closest($(`#category-${index + 1}-${card.pointValue.toString()}`))
+          .text(card.question);
+        clickCardDom();
       });
     })
   );
@@ -115,15 +147,113 @@ function updatePlayerScore(player1, player2, player3) {
   $("#player-3-score").text(`Score: ${player3.playerScore}`);
 }
 
-// increasePointValue() {} (only called on Round 2)
+function displayRoundWinner(round, game) {
+  if (game.currentRoundNum === 1 || game.currentRoundNum === 2) {
+    $("table").hide();
+    $(".round-winner").show();
+    $(".round-winner").text(
+      `Congratulations ${round.roundWinner[0].playerName}, you won the round!`
+    );
+  } else if (game.currentRoundNum === 3) {
+    $("table").hide();
+    $(".round-winner").show();
+    $(".round-winner").text(
+      `Congratulations ${
+        round.roundWinner[0].playerName
+      }, you won the whole game! WOWZA!`
+    );
+  }
+}
 
-//dom-bois
 $(".restart-game-button").on("click", () => {
   location.reload();
 });
 
-$('.card').on('click', () => {
-  $('#player-1-answer-input').val('')
-})
+$(".start-game-button").on("click", () => {
+  $(".splash-page").hide();
+  $(".main-page").show();
+});
 
-// determineCardValueForRounds() {}
+function clickCardDom() {
+  $("#player-answer-input").val("");
+  $(".main-h1").hide();
+  $(".player-bar").hide();
+  $("table").hide();
+  $(".question-and-answer").show();
+}
+
+$("#player-answer-button").on("click", () => {
+  $(".question-and-answer").hide();
+  $(".dd").hide();
+  $("table").show();
+  $(".main-h1").show();
+  $(".player-bar").show();
+});
+
+function endRound(round, game, finalround) {
+  if (round.remainingCardCount === 15 && game.currentRoundNum === 1) {
+    round.determineRoundWinner(game.playerSet);
+    displayRoundWinner(round, game);
+    setTimeout(function() {
+      $("table").replaceWith(tableClone);
+      $(".card").each(function() {
+        $(this).text($(this).text() * 2);
+      });
+      game.startRound();
+      round.remainingCardCount = 16;
+      startRoundManager(game.currentRound, game);
+      round.assignDailyDouble2();
+      assignDailyDouble(round, game);
+      $(".round-winner").hide();
+    }, 2000);
+  } else if (round.remainingCardCount === 12 && game.currentRoundNum === 2) {
+    $("table").hide();
+    displayRoundWinner(round, game);
+    setTimeout(function() {
+      game.startRound();
+      $(".round-winner").hide();
+      $(".final-round-answers").hide();
+      $(".final-round-page").show();
+      $("#final-category").text(
+        "The Final Category is..." + game.currentRound.categories[0][0]
+      );
+      $("#final-clue").text(game.currentRound.finalCard.map(card => card.question));
+    }, 2000);
+  }
+}
+
+function assignDailyDouble(round, game) {
+  $(".card").on("click", () => {
+    if (
+      round.dailyDouble1 === round.remainingCardCount ||
+      round.dailyDouble2 === round.remainingCardCount
+    ) {
+      $(".player-input-labels-dd").text(
+        game.playerSet[game.currentPlayer].playerName + "Please Enter a Wager!"
+      );
+      $(".dd").show();
+      $("#player-answer-button").prop("disabled", true);
+      takeWager(game);
+    }
+  });
+}
+
+function takeWager(game) {
+  $("#player-1-wager-button").on("click", () => {
+    if (game.currentRoundNum === 1) {
+      game.currentCard.pointValue = Math.max(
+        $("#player-1-hidden-input").val(),
+        0
+      );
+    } else if (game.currentRoundNum === 2) {
+      game.currentCard.pointValue =
+        Math.max($("#player-1-hidden-input").val(), 0) / 2;
+    }
+    if (
+      $("#player-1-hidden-input").val() <
+      Math.max(game.playerSet[game.currentPlayer].playerScore, 0) + 101
+    ) {
+      $("#player-answer-button").prop("disabled", false);
+    }
+  });
+}
